@@ -275,7 +275,7 @@
         deleted.value = 0;
         emit("offTableAdd");
       try {
-          const response = await axios.get("http://localhost:8080/clinica/citas");
+          const response = await axios.get("https://reinamadreback/clinica/citas");
           console.log(response.data);
           citas.value = response.data;
       }catch(error){
@@ -287,7 +287,7 @@
         deleted.value = 1;
         emit("offTableAdd");
       try {
-          const response = await axios.get("http://localhost:8080/clinica/citas");
+          const response = await axios.get("https://reinamadreback/clinica/citas");
           console.log(response.data);
           citasDeleted.value = response.data;
       }catch(error){
@@ -309,7 +309,7 @@
         console.log("Datos a guardar:", filteredCitas.value[index]);
         const citaGuardar = filteredCitas.value[index];
       try {
-          const response = await axios.post("http://localhost:8080/clinica/cita", {
+          const response = await axios.post("https://reinamadreback/clinica/cita", {
               id_cita:  citaGuardar.id_cita,
               fecha:    citaGuardar.fecha,
               paciente: citaGuardar.paciente,
@@ -331,7 +331,7 @@
         console.log("Datos a guardar:", filteredCitas.value[index]);
         const citaGuardar = filteredCitas.value[index];
       try {
-          const response = await axios.post("http://localhost:8080/clinica/cita", {
+          const response = await axios.post("https://reinamadreback/clinica/cita", {
               id_cita:  citaGuardar.id_cita,
               fecha:    citaGuardar.fecha,
               paciente: citaGuardar.paciente,
@@ -397,7 +397,7 @@
         //Se completan los valores dela fecha para hacer match con los tipos de datos de JAVA y SQlite
         fecha.value = fecha.value.replace('T',' ');
         fecha.value = fecha.value+":00";
-          const response = await axios.post("http://localhost:8080/clinica/cita", {
+          const response = await axios.post("https://reinamadreback/clinica/cita", {
               fecha:    fecha.value,
               paciente: paciente.value,
               id_tipo:  id_tipo.value,

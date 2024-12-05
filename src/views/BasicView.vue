@@ -88,7 +88,7 @@ const changeLogeo = ()=>{
 
 const login = async () => {
   try {
-      const response = await axios.post("http://localhost:8080/clinica/user", {
+      const response = await axios.post("https://reinamadreback/clinica/user", {
       name:user.value, 
       password:password.value
     });
