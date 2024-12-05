@@ -46,7 +46,9 @@
             <td>
               <input
                 v-if="editingIndex === index"
-                type="text"
+                type="number"
+                max="4"
+                min="1"
                 class="form-control"
                 v-model="item.id_tipo"
               />
@@ -102,8 +104,8 @@
         <!-- Cuerpo de tabla que se mostrara al seleccionar los eliminados -->
 
         <tbody v-if="deleted === 1 && showAgendar != 1">
-          <tr v-for="(item, index) in deletedCitas" :key="item.id">
-            <td>{{ index + 1 }}</td>
+          <tr v-for="(item, index) in deletedCitas" :key="item.id_cita">
+            <td>{{ item.id_cita }}</td>
 
             <td>
               <input
@@ -201,6 +203,7 @@
                 id ="id_tipo"
                 name="id_tipo"
                 class="form-control"
+                pattern="[0-9\/]*"
                 v-model="id_tipo"
               />
             </td>
@@ -227,6 +230,7 @@
 
             <td>
               <button
+                type="submit"
                 class="btn btn-success btn-sm"
                 @click="saveCita(reg)"
               >
@@ -238,6 +242,9 @@
         </tbody>
 
       </table>
+      <div style="text-align: center;" class="mensaje-error">
+        {{ msjValidation }}
+      </div>
     </div>
   </template>
   
@@ -256,6 +263,7 @@
   const citas = ref([]);
   const citasDeleted = ref([]);
   const deleted = ref(0);
+  const msjValidation = ref ('');
 
   let fecha      = ref('');
   let paciente    = ref('');
@@ -287,9 +295,6 @@
         }
       };
 
-
-      
-
     
     const filteredCitas = computed(() =>        citas.value.filter(item => item.other == null));
     const deletedCitas  = computed(() => citasDeleted.value.filter(item => item.other != null));
@@ -301,8 +306,8 @@
     };
 
     const saveChanges = async (index) => {
-        console.log("Datos a guardar:", citas.value[index]);
-        const citaGuardar = citas.value[index];
+        console.log("Datos a guardar:", filteredCitas.value[index]);
+        const citaGuardar = filteredCitas.value[index];
       try {
           const response = await axios.post("http://localhost:8080/clinica/cita", {
               id_cita:  citaGuardar.id_cita,
@@ -323,8 +328,8 @@
 
 
     const deleteCita = async (index) => {
-        console.log("Datos a guardar:", citas.value[index]);
-        const citaGuardar = citas.value[index];
+        console.log("Datos a guardar:", filteredCitas.value[index]);
+        const citaGuardar = filteredCitas.value[index];
       try {
           const response = await axios.post("http://localhost:8080/clinica/cita", {
               id_cita:  citaGuardar.id_cita,
@@ -337,6 +342,7 @@
             }
           );
           console.log(response.data);
+          getCitas();
       }catch(error){
         console.error("Error al actualizar la cita", error);
     }
@@ -345,10 +351,52 @@
 
 
     const saveCita = async () => {
+
         console.log("Datos a guardar:", fecha.value+" "+paciente.value+" "+id_tipo.value+" "+nombre_medico.value+" "+numero_cita.value);
+  
+        //Validacion de campos a la antigua (sin usar forms)
+
+        let camp1 =true,camp2 = true,camp3 = true,camp4 = true,camp5 = true, continued = false;
+
+        camp1 = (fecha.value.length !== 16) ? false : camp1;
+        camp2 = (paciente.value.length == 0) ? false: camp2;
+        camp3 = (id_tipo.value.length == 0) ? false: camp3;
+        camp4 = (nombre_medico.value.length == 0) ? false: camp4;
+        camp5 = (numero_cita.value.length == 0) ? false : camp5;
+        
+
+        if(camp1 == false){
+          msjValidation.value = "Valida la fecha del 1er campo";
+        }else{
+          if(camp2 == false){
+            msjValidation.value = "Ingresa el nombre del paciente";
+          }else{
+            if(camp3 == false){
+              msjValidation.value = "Selecciona un tipo";
+            }else{
+              if(camp4 == false){
+                msjValidation.value = "Escribe el nombre del médico";
+              }else{
+                if(camp5 == false){
+                  msjValidation.value = "Ingresa el numero de la cita para temrinar";
+                }else{
+                  msjValidation.value = "";
+                  continued = true;
+                }
+              }
+            }
+          }
+        }
+        
+
+      if(continued == false){
+        console.log ("Error en la validacion de los campos, no se puede continuar...")
+        }else{
+
+      try {
+        //Se completan los valores dela fecha para hacer match con los tipos de datos de JAVA y SQlite
         fecha.value = fecha.value.replace('T',' ');
         fecha.value = fecha.value+":00";
-      try {
           const response = await axios.post("http://localhost:8080/clinica/cita", {
               fecha:    fecha.value,
               paciente: paciente.value,
@@ -361,10 +409,9 @@
           alert('Registro exitoso!')
       }catch(error){
         console.error("Error al actualizar la cita", error);
-    }
+      }
+      }
     };
-
-
 
     const closeSession = () =>{
     console.log("Eliminamos la sesion");
@@ -377,5 +424,14 @@
   <style>
   .container {
     margin-top: 20px;
+  }
+  .campo-invalido {
+  border: 1px solid red;
+  }
+
+  .mensaje-error {
+  color: red;
+  font-size: 1.3em;
+  text-shadow: darkblue;
   }
   </style>
